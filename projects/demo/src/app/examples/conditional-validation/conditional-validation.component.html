@@ -1,0 +1,38 @@
+<form [formGroup]="formGroup" (ngSubmit)="onNgSubmit()">
+  <p>
+    <mat-form-field>
+      <mat-label>Shipping Method</mat-label>
+      <mat-select
+        [formControl]="formGroup.controls.shippingMethod"
+        (selectionChange)="onShippingMethodChange()"
+      >
+        <mat-option value="Pickup">Pickup</mat-option>
+        <mat-option value="Delivery">Delivery</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </p>
+
+  <p>
+    <mat-form-field>
+      <mat-label>Delivery Address</mat-label>
+      <input
+        matInput
+        type="text"
+        [formControl]="formGroup.controls.deliveryAddress"
+        [required]="formGroup.controls.deliveryAddress.enabled"
+      />
+      @if (
+        formGroup.controls.deliveryAddress.touched &&
+        formGroup.controls.deliveryAddress.invalid
+      ) {
+        <mat-error>
+          {{ formatErrors(formGroup.controls.deliveryAddress) }}
+        </mat-error>
+      }
+    </mat-form-field>
+  </p>
+
+  <p>
+    <button mat-flat-button [disabled]="formGroup.invalid">Submit</button>
+  </p>
+</form>

@@ -1,0 +1,49 @@
+<form [formGroup]="formGroup" (ngSubmit)="onNgSubmit()">
+  @for (
+    tire of formGroup.controls.tires.controls;
+    track tire.controls.id.value
+  ) {
+    <p>
+      <mat-form-field>
+        <mat-label>Tire {{ $index + 1 }}</mat-label>
+        <input
+          matInput
+          name="username"
+          type="number"
+          autocomplete="username"
+          [formControl]="tire.controls.price"
+          (input)="onInput($index)"
+          [attr.data-testid]="'input' + $index"
+        />
+        @if (tire.controls.price.touched && tire.controls.price.invalid) {
+          <mat-error>
+            {{ formatErrors(tire.controls.price) }}
+          </mat-error>
+        }
+      </mat-form-field>
+
+      <button
+        mat-button
+        type="button"
+        (click)="addTire($index + 1, 0)"
+        [attr.data-testid]="'add' + $index"
+      >
+        Add
+      </button>
+
+      <button
+        mat-button
+        type="button"
+        (click)="removeTire($index)"
+        [disabled]="$count === 1"
+        [attr.data-testid]="'remove' + $index"
+      >
+        Remove
+      </button>
+    </p>
+  }
+
+  <p>
+    <button mat-flat-button [disabled]="formGroup.invalid">Submit</button>
+  </p>
+</form>

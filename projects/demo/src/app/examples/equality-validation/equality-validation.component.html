@@ -1,0 +1,50 @@
+<form [formGroup]="formGroup" (ngSubmit)="onNgSubmit()">
+  <input name="username" autocomplete="username" value="Bob" class="hidden" />
+
+  <p>
+    <mat-form-field>
+      <mat-label>Password</mat-label>
+      <input
+        matInput
+        name="password"
+        type="password"
+        autocomplete="new-password"
+        [formControl]="formGroup.controls.password"
+        (input)="formGroup.controls.confirmPassword.updateValueAndValidity()"
+      />
+      @if (
+        formGroup.controls.password.touched &&
+        formGroup.controls.password.invalid
+      ) {
+        <mat-error>
+          {{ formatErrors(formGroup.controls.password) }}
+        </mat-error>
+      }
+    </mat-form-field>
+  </p>
+
+  <p>
+    <mat-form-field>
+      <mat-label>Confirm password</mat-label>
+      <input
+        matInput
+        name="confirmPassword"
+        type="password"
+        autocomplete="new-password"
+        [formControl]="formGroup.controls.confirmPassword"
+      />
+      @if (
+        formGroup.controls.confirmPassword.touched &&
+        formGroup.controls.confirmPassword.invalid
+      ) {
+        <mat-error>
+          {{ formatErrors(formGroup.controls.confirmPassword) }}
+        </mat-error>
+      }
+    </mat-form-field>
+  </p>
+
+  <p>
+    <button mat-flat-button [disabled]="formGroup.invalid">Submit</button>
+  </p>
+</form>

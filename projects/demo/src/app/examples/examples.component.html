@@ -1,0 +1,15 @@
+<section class="flex flex-wrap justify-center items-center">
+  @for (route of routes; track route.path) {
+    <a mat-tab-link [routerLink]="route.path" class="mx-4 my-1.5 w-80">
+      <mat-card class="w-full text-center p-4">
+        <mat-card-title>
+          {{ route.title }}
+        </mat-card-title>
+      </mat-card>
+    </a>
+  }
+</section>
+
+<section class="w-fit mx-auto mt-4">
+  <router-outlet></router-outlet>
+</section>
