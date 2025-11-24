@@ -1,22 +1,14 @@
 <h1 class="text-center text-xl">Getting Started</h1>
 
-<pre class="w-80 md:w-160 lg:w-240">
-  <code class="language-shell">{{installCode}}</code>
-</pre>
+<app-code class="w-80 md:w-160 lg:w-240" language="shell" [code]="installCode"></app-code>
 
-<pre class="w-80 md:w-160 lg:w-240">
-  <code class="language-typescript">{{importCode}}</code>
-</pre>
+<app-code class="w-80 md:w-160 lg:w-240" language="typescript" [code]="importCode"></app-code>
 
 <mat-tab-group animationDuration="0">
   <mat-tab label="HTML">
-    <pre class="w-80 md:w-160 lg:w-240">
-      <code class="language-html">{{htmlCode}}</code>
-    </pre>
+    <app-code class="w-80 md:w-160 lg:w-240" language="html" [code]="htmlCode"></app-code>
   </mat-tab>
   <mat-tab label="TS">
-    <pre class="w-80 md:w-160 lg:w-240">
-      <code class="language-typescript">{{tsCode}}</code>
-    </pre>
+    <app-code class="w-80 md:w-160 lg:w-240" language="typescript" [code]="tsCode"></app-code>
   </mat-tab>
 </mat-tab-group>

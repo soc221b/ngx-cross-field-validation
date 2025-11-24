@@ -7,7 +7,7 @@ export type AbstractControlPathValue<
   P extends AbstractControlPaths<T>,
 > = Recursive<T, AbstractControlTuplePath<P>>;
 
-type Recursive<
+export type Recursive<
   T extends AbstractControl,
   TT = AbstractControlTuplePath<AbstractControlPaths<T>>,
 > = T extends FormGroup
@@ -23,11 +23,15 @@ type Recursive<
 export function abstractControlPathValue<
   T extends AbstractControl,
   P extends AbstractControlPaths<T>,
->(
-  control: T,
-  path: AbstractControlTuplePath<P>,
-): AbstractControlPathValue<T, P> {
-  for (const p of path) {
+>(control: T, path: P): AbstractControlPathValue<T, P> {
+  const ps = [];
+  const re = /\[number\]|[^\.\[]+/g;
+  let next;
+  while ((next = re.exec(path)) !== null) {
+    ps.push(next[0]);
+  }
+
+  for (const p of ps) {
     control = (control as any)['controls'][p];
   }
 

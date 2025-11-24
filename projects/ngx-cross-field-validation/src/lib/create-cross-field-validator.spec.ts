@@ -95,10 +95,9 @@ describe('createCrossFieldValidator', () => {
         validators: [
           createCrossFieldValidator<T, 'confirmPassword'>(
             ({ root, control }) =>
-              () =>
-                root.controls.password.value === control.value
-                  ? null
-                  : { custom: 'Passwords do not match' },
+              root.controls.password.value === control.value
+                ? null
+                : { custom: 'Passwords do not match' },
           ),
         ],
       }),
@@ -126,11 +125,13 @@ describe('createCrossFieldValidator', () => {
       shippingMethod: new FormControl('Pickup', { nonNullable: true }),
       deliveryAddress: new FormControl(null, {
         validators: [
-          createCrossFieldValidator<T, 'deliveryAddress'>(({ root }) => {
-            return root.controls.shippingMethod.value === 'Delivery'
-              ? Validators.required
-              : null;
-          }),
+          createCrossFieldValidator<T, 'deliveryAddress'>(
+            ({ root, control }) => {
+              return root.controls.shippingMethod.value === 'Delivery'
+                ? Validators.required(control)
+                : null;
+            },
+          ),
         ],
       }),
     });
@@ -181,7 +182,7 @@ describe('createCrossFieldValidator', () => {
                 const prev = root.controls.tires.controls[idx - 1];
                 const prevPrice = prev.getRawValue().price;
                 if (prevPrice === null) return null;
-                return Validators.min(prevPrice + 1);
+                return Validators.min(prevPrice + 1)(control);
               },
             ),
           ],
@@ -223,14 +224,12 @@ describe('createCrossFieldValidator', () => {
         nonNullable: true,
         validators: [
           Validators.required,
-          createCrossFieldValidator<T, 'to'>(
-            ({ root, control }) =>
-              () =>
-                root.controls.from.value === null ||
-                root.controls.to.value === null ||
-                root.controls.from.value !== control.value
-                  ? null
-                  : { custom: 'The to and from accounts cannot be the same' },
+          createCrossFieldValidator<T, 'to'>(({ root, control }) =>
+            root.controls.from.value === null ||
+            root.controls.to.value === null ||
+            root.controls.from.value !== control.value
+              ? null
+              : { custom: 'The to and from accounts cannot be the same' },
           ),
         ],
       }),

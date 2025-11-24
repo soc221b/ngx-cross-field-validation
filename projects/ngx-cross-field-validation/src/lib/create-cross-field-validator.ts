@@ -1,4 +1,4 @@
-import { FormGroup, ValidatorFn } from '@angular/forms';
+import { FormGroup, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { AbstractControlPaths } from './abstract-control-paths';
 import { lookupPath } from './lookup-path';
 import { AbstractControlPathValue } from './abstract-control-path-value';
@@ -8,11 +8,11 @@ export function createCrossFieldValidator<
   T extends FormGroup,
   P extends AbstractControlPaths<T> = AbstractControlPaths<T>,
 >(
-  createValidator: (_: {
+  crossFieldValidatorFn: (_: {
     control: AbstractControlPathValue<T, P>;
     path: AbstractControlTuplePath<P>;
     root: T;
-  }) => null | ValidatorFn,
+  }) => ValidationErrors | null,
 ): ValidatorFn {
   let cache: readonly PropertyKey[] = [];
 
@@ -20,7 +20,7 @@ export function createCrossFieldValidator<
     const root = control.root;
     if (root.controls === undefined) return null;
 
-    const validator = createValidator({
+    return crossFieldValidatorFn({
       control,
       get path() {
         return (cache = lookupPath(
@@ -30,7 +30,5 @@ export function createCrossFieldValidator<
       },
       root,
     });
-
-    return validator ? validator(control) : null;
   };
 }

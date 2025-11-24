@@ -9,12 +9,15 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { formatErrors } from '../../format-errors';
-import { sameAs } from '../../validators/same-as';
+import { createExtraValidators } from '../../create-extra-validators';
+import { CodeComponent } from '../../code/code.component';
 
 type TFormGroup = FormGroup<{
   password: FormControl<string>;
   confirmPassword: FormControl<string>;
 }>;
+
+const ExtraValidators = createExtraValidators<TFormGroup>();
 
 @Component({
   selector: 'app-equality-validation',
@@ -23,6 +26,7 @@ type TFormGroup = FormGroup<{
     MatInputModule,
     MatButtonModule,
     ReactiveFormsModule,
+    CodeComponent,
   ],
   templateUrl: './equality-validation.component.html',
 })
@@ -33,7 +37,7 @@ export class EqualityValidationComponent {
       nonNullable: true,
     }),
     confirmPassword: new FormControl("don'ttellanyone", {
-      validators: [Validators.required, sameAs<TFormGroup>(['password'])],
+      validators: [Validators.required, ExtraValidators.sameAs('password')],
       nonNullable: true,
     }),
   });
@@ -45,4 +49,12 @@ export class EqualityValidationComponent {
 
     alert('Submitted');
   }
+
+  code = `
+new FormControl("", {
+  validators: [
+    ExtraValidators.sameAs('password'),
+  ],
+})
+  `.trim();
 }

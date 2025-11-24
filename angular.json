@@ -43,10 +43,6 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": {
-              "base": "docs",
-              "browser": ""
-            },
             "index": "projects/demo/src/index.html",
             "browser": "projects/demo/src/main.ts",
             "polyfills": ["zone.js"],
@@ -65,6 +61,11 @@
           },
           "configurations": {
             "production": {
+              "outputPath": {
+                "base": "docs",
+                "browser": ""
+              },
+              "baseHref": "/ngx-cross-field-validation/",
               "budgets": [
                 {
                   "type": "initial",

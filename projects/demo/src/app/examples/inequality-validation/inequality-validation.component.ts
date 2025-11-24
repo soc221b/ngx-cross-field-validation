@@ -9,12 +9,15 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { formatErrors } from '../../format-errors';
 import { MatButtonModule } from '@angular/material/button';
-import { differentFrom } from '../../validators/different-fromt';
+import { createExtraValidators } from '../../create-extra-validators';
+import { CodeComponent } from '../../code/code.component';
 
 type TFormGroup = FormGroup<{
   from: FormControl<string>;
   to: FormControl<string>;
 }>;
+
+const ExtraValidators = createExtraValidators<TFormGroup>();
 
 @Component({
   selector: 'app-inequality-validation',
@@ -23,6 +26,7 @@ type TFormGroup = FormGroup<{
     MatButtonModule,
     MatInputModule,
     ReactiveFormsModule,
+    CodeComponent,
   ],
   templateUrl: './inequality-validation.component.html',
 })
@@ -30,11 +34,11 @@ export class InequalityValidationComponent {
   formGroup = new FormGroup<TFormGroup['controls']>({
     from: new FormControl('Bob', {
       nonNullable: true,
-      validators: [Validators.required, differentFrom<TFormGroup>(['to'])],
+      validators: [Validators.required, ExtraValidators.differentFrom('to')],
     }),
     to: new FormControl('Alice', {
       nonNullable: true,
-      validators: [Validators.required, differentFrom<TFormGroup>(['from'])],
+      validators: [Validators.required, ExtraValidators.differentFrom('from')],
     }),
   });
 
@@ -45,4 +49,17 @@ export class InequalityValidationComponent {
 
     alert('Submitted');
   }
+
+  code = `
+new FormControl('', {
+  validators: [
+    ExtraValidators.differentFrom('to'),
+  ],
+})
+new FormControl('', {
+  validators: [
+    ExtraValidators.differentFrom('from'),
+  ],
+})
+  `.trim();
 }

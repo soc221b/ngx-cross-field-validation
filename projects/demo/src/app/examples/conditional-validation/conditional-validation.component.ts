@@ -10,12 +10,15 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { formatErrors } from '../../format-errors';
-import { createCrossFieldValidator } from '../../../../../ngx-cross-field-validation/src/public-api';
+import { createExtraValidators } from '../../create-extra-validators';
+import { CodeComponent } from '../../code/code.component';
 
 type TFormGroup = FormGroup<{
-  shippingMethod: FormControl<'Pickup' | 'Delivery'>;
+  shippingMethod: FormControl<'pickup' | 'delivery'>;
   deliveryAddress: FormControl<string | null>;
 }>;
+
+const ExtraValidators = createExtraValidators<TFormGroup>();
 
 @Component({
   selector: 'app-conditional-validation',
@@ -25,22 +28,22 @@ type TFormGroup = FormGroup<{
     MatInputModule,
     MatSelectModule,
     ReactiveFormsModule,
+    CodeComponent,
   ],
   templateUrl: './conditional-validation.component.html',
 })
 export class ConditionalValidationComponent implements OnInit {
   formGroup = new FormGroup<TFormGroup['controls']>({
-    shippingMethod: new FormControl('Pickup', {
+    shippingMethod: new FormControl('pickup', {
       nonNullable: true,
       validators: [Validators.required],
     }),
     deliveryAddress: new FormControl(null, {
       validators: [
-        createCrossFieldValidator<TFormGroup>(({ root, control }) => {
-          return root.controls.shippingMethod.value === 'Delivery'
-            ? Validators.required
-            : null;
-        }),
+        ExtraValidators.requiredIf(
+          'shippingMethod',
+          (value) => value === 'delivery',
+        ),
       ],
     }),
   });
@@ -52,7 +55,7 @@ export class ConditionalValidationComponent implements OnInit {
   }
 
   onShippingMethodChange() {
-    if (this.formGroup.controls.shippingMethod.value === 'Delivery') {
+    if (this.formGroup.controls.shippingMethod.value === 'delivery') {
       this.formGroup.controls.deliveryAddress.enable();
     } else {
       this.formGroup.controls.deliveryAddress.disable();
@@ -65,4 +68,15 @@ export class ConditionalValidationComponent implements OnInit {
 
     alert('Submitted');
   }
+
+  code = `
+new FormControl(null, {
+  validators: [
+    ExtraValidators.requiredIf(
+      'shippingMethod',
+      (value) => value === 'delivery',
+    ),
+  ],
+})
+  `.trim();
 }

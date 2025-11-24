@@ -1,39 +1,41 @@
-import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { MatTabsModule } from '@angular/material/tabs';
-import { delay, fromEvent, startWith, Subscription, tap } from 'rxjs';
+import { CodeComponent } from '../code/code.component';
 
 @Component({
   selector: 'app-homepage',
-  imports: [MatTabsModule],
+  imports: [MatTabsModule, CodeComponent],
   templateUrl: './homepage.component.html',
 })
-export class HomepageComponent implements OnInit, AfterViewInit, OnDestroy {
-  subscription?: Subscription;
-
-  ngOnInit(): void {
-    this.subscription = fromEvent(window, 'click')
-      .pipe(
-        startWith(),
-        delay(0),
-        tap(() => (window as any).hljs.highlightAll()),
-      )
-      .subscribe();
-  }
-
-  ngAfterViewInit(): void {
-    (window as any).hljs.highlightAll();
-  }
-
-  ngOnDestroy(): void {
-    this.subscription?.unsubscribe();
-  }
-
+export class HomepageComponent {
   installCode = `
 $ npm i ngx-cross-field-validation
   `.trim();
 
   importCode = `
-import { createCrossFieldValidator } from 'ngx-cross-field-validation';
+import {
+  createCrossFieldValidator,
+  abstractControlPathValue,
+  AbstractControlPathValue,
+  AbstractControlPaths,
+} from 'ngx-cross-field-validation';
+
+function createExtraValidators<T extends FormGroup>() {
+  return {
+    requiredIf: function <P extends AbstractControlPaths<T>>(
+      otherPath: P,
+      predicate: (otherValue: AbstractControlPathValue<T, P>['value']) => boolean,
+    ) {
+      return createCrossFieldValidator<T>(function ({ root }) {
+        if (predicate(abstractControlPathValue(root, otherPath).value)) {
+          return null;
+        }
+
+        return { required: true };
+      });
+    },
+  };
+}
   `.trim();
 
   htmlCode = `
@@ -57,19 +59,18 @@ type T = FormGroup<{
   deliveryAddress: FormControl<null | string>;
 }>;
 
+const ExtraValidators = createExtraValidators<T>();
+
 new FormGroup<T>({
-  shippingMethod: new FormControl("pickup", {
+  shippingMethod: new FormControl('pickup', {
     nonNullable: true,
-    validators: [
-      Validators.required,
-    ],
+    validators: [Validators.required],
   }),
   deliveryAddress: new FormControl(null, {
     validators: [
-      createCrossFieldValidator<T>(({ root }) =>
-        root.controls.shippingMethod.value === 'delivery'
-          ? Validators.required
-          : null,
+      ExtraValidators.requiredIf(
+        'shippingMethod',
+        (value) => value === 'delivery',
       ),
     ],
   }),

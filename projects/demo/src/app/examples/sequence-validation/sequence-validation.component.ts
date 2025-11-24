@@ -10,8 +10,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { formatErrors } from '../../format-errors';
 import { MatButtonModule } from '@angular/material/button';
-import { createCrossFieldValidator } from '../../../../../ngx-cross-field-validation/src/public-api';
 import { MatSelectModule } from '@angular/material/select';
+import { createExtraValidators } from '../../create-extra-validators';
+import { CodeComponent } from '../../code/code.component';
 
 type TFormGroup = FormGroup<{
   tires: FormArray<
@@ -22,6 +23,8 @@ type TFormGroup = FormGroup<{
   >;
 }>;
 
+const ExtraValidators = createExtraValidators<TFormGroup>();
+
 @Component({
   selector: 'app-sequence-validation',
   imports: [
@@ -30,6 +33,7 @@ type TFormGroup = FormGroup<{
     MatInputModule,
     MatSelectModule,
     ReactiveFormsModule,
+    CodeComponent,
   ],
   templateUrl: './sequence-validation.component.html',
 })
@@ -63,16 +67,8 @@ export class SequenceValidationComponent implements OnInit {
         nonNullable: true,
         validators: [
           Validators.required,
-          createCrossFieldValidator<TFormGroup, 'tires[number].price'>(
-            ({ root, path }) => {
-              const index = path[1];
-              if (index === 0) return null;
-
-              const previousControl = root.controls.tires.controls[index - 1];
-              const previousPrice = previousControl.getRawValue().price;
-
-              return Validators.min(previousPrice + 1);
-            },
+          ExtraValidators.withPrevious('tires', (previousTire) =>
+            Validators.min(previousTire.controls.price.value),
           ),
         ],
       }),
@@ -104,4 +100,15 @@ export class SequenceValidationComponent implements OnInit {
 
     alert('Submitted');
   }
+
+  code = `
+new FormControl('', {
+  validators: [
+    ExtraValidators.withPrevious(
+      'tires',
+      (previousTire) => Validators.min(previousTire.controls.price.value),
+    )
+  ],
+})
+  `.trim();
 }
