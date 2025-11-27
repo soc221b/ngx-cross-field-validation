@@ -59,7 +59,7 @@ export class SequenceValidationComponent implements OnInit {
       id: new FormControl(
         Math.max(
           -1,
-          ...this.formGroup.getRawValue().tires.map((email) => email.id),
+          ...this.formGroup.getRawValue().tires.map((tire) => tire.id),
         ) + 1,
         { nonNullable: true },
       ),
