@@ -40,12 +40,12 @@ function createExtraValidators<T extends FormGroup>() {
       otherPath: P,
       predicate: (otherValue: AbstractControlPathValue<T, P>['value']) => boolean,
     ) {
-      return createCrossFieldValidator<T>(function ({ root }) {
-        if (predicate(abstractControlPathValue(root, otherPath).value)) {
+      return createCrossFieldValidator<T>(function ({ root, control }) {
+        if (predicate(abstractControlPathValue(root, path).value) === false) {
           return null;
         }
 
-        return { required: true };
+        return Validators.required(control);
       });
     },
   };
