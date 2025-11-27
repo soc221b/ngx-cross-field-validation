@@ -10,7 +10,6 @@
           matInput
           type="number"
           [formControl]="tire.controls.price"
-          (input)="onInput($index)"
           [attr.data-testid]="'input' + $index"
         />
         @if (tire.controls.price.touched && tire.controls.price.invalid) {

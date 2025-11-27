@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject, Injector } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -17,8 +17,6 @@ type TFormGroup = FormGroup<{
   to: FormControl<string>;
 }>;
 
-const ExtraValidators = createExtraValidators<TFormGroup>();
-
 @Component({
   selector: 'app-inequality-validation',
   imports: [
@@ -31,14 +29,23 @@ const ExtraValidators = createExtraValidators<TFormGroup>();
   templateUrl: './inequality-validation.component.html',
 })
 export class InequalityValidationComponent {
+  injector = inject(Injector);
+  ExtraValidators = createExtraValidators<TFormGroup>(this.injector);
+
   formGroup = new FormGroup<TFormGroup['controls']>({
     from: new FormControl('Bob', {
       nonNullable: true,
-      validators: [Validators.required, ExtraValidators.differentFrom('to')],
+      validators: [
+        Validators.required,
+        this.ExtraValidators.differentFrom('to'),
+      ],
     }),
     to: new FormControl('Alice', {
       nonNullable: true,
-      validators: [Validators.required, ExtraValidators.differentFrom('from')],
+      validators: [
+        Validators.required,
+        this.ExtraValidators.differentFrom('from'),
+      ],
     }),
   });
 

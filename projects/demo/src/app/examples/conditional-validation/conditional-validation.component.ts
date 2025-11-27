@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, Injector, OnInit } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -18,8 +18,6 @@ type TFormGroup = FormGroup<{
   deliveryAddress: FormControl<string | null>;
 }>;
 
-const ExtraValidators = createExtraValidators<TFormGroup>();
-
 @Component({
   selector: 'app-conditional-validation',
   imports: [
@@ -33,6 +31,9 @@ const ExtraValidators = createExtraValidators<TFormGroup>();
   templateUrl: './conditional-validation.component.html',
 })
 export class ConditionalValidationComponent implements OnInit {
+  injector = inject(Injector);
+  ExtraValidators = createExtraValidators<TFormGroup>(this.injector);
+
   formGroup = new FormGroup<TFormGroup['controls']>({
     shippingMethod: new FormControl('pickup', {
       nonNullable: true,
@@ -40,7 +41,7 @@ export class ConditionalValidationComponent implements OnInit {
     }),
     deliveryAddress: new FormControl(null, {
       validators: [
-        ExtraValidators.requiredIf(
+        this.ExtraValidators.requiredIf(
           'shippingMethod',
           (value) => value === 'delivery',
         ),
@@ -60,7 +61,6 @@ export class ConditionalValidationComponent implements OnInit {
     } else {
       this.formGroup.controls.deliveryAddress.disable();
     }
-    this.formGroup.controls.deliveryAddress.updateValueAndValidity();
   }
 
   onNgSubmit() {

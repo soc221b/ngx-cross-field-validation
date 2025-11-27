@@ -10,7 +10,6 @@
         type="password"
         autocomplete="new-password"
         [formControl]="formGroup.controls.password"
-        (input)="formGroup.controls.confirmPassword.updateValueAndValidity()"
       />
       @if (
         formGroup.controls.password.touched &&

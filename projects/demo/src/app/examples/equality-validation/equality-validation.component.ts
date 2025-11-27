@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject, Injector } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -17,8 +17,6 @@ type TFormGroup = FormGroup<{
   confirmPassword: FormControl<string>;
 }>;
 
-const ExtraValidators = createExtraValidators<TFormGroup>();
-
 @Component({
   selector: 'app-equality-validation',
   imports: [
@@ -31,13 +29,19 @@ const ExtraValidators = createExtraValidators<TFormGroup>();
   templateUrl: './equality-validation.component.html',
 })
 export class EqualityValidationComponent {
+  injector = inject(Injector);
+  ExtraValidators = createExtraValidators<TFormGroup>(this.injector);
+
   formGroup = new FormGroup<TFormGroup['controls']>({
     password: new FormControl("don'ttellanyone", {
       validators: [Validators.required],
       nonNullable: true,
     }),
     confirmPassword: new FormControl("don'ttellanyone", {
-      validators: [Validators.required, ExtraValidators.sameAs('password')],
+      validators: [
+        Validators.required,
+        this.ExtraValidators.sameAs('password'),
+      ],
       nonNullable: true,
     }),
   });

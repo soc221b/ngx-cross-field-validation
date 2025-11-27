@@ -7,7 +7,6 @@
         type="text"
         name="from"
         [formControl]="formGroup.controls.from"
-        (input)="formGroup.controls.to.updateValueAndValidity()"
       />
 
       @if (formGroup.controls.from.touched && formGroup.controls.from.invalid) {
@@ -24,7 +23,6 @@
         type="text"
         name="to"
         [formControl]="formGroup.controls.to"
-        (input)="formGroup.controls.from.updateValueAndValidity()"
       />
 
       @if (formGroup.controls.to.touched && formGroup.controls.to.invalid) {

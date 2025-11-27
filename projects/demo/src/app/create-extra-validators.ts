@@ -5,12 +5,35 @@ import {
   abstractControlPathValue,
   createCrossFieldValidator,
 } from '../../../ngx-cross-field-validation/src/public-api';
+import { DestroyRef, Injector } from '@angular/core';
+import { Subscription, tap } from 'rxjs';
 
-export function createExtraValidators<T extends FormGroup>() {
+export function createExtraValidators<T extends FormGroup>(injector: Injector) {
   return {
     differentFrom: function <P extends AbstractControlPaths<T>>(path: P) {
+      injector.get(DestroyRef).onDestroy(() => {
+        subscription?.unsubscribe();
+        subscription = null;
+      });
+      let subscription: null | Subscription = null;
+      let isSelf = false;
+
       return createCrossFieldValidator<T>(function ({ root, control }) {
-        if (abstractControlPathValue(root, path).value !== control.value) {
+        const targetControl = abstractControlPathValue(root, path);
+
+        subscription?.unsubscribe();
+        subscription = targetControl.valueChanges
+          .pipe(
+            tap(() => {
+              if (isSelf) return;
+              isSelf = true;
+              control.updateValueAndValidity();
+              isSelf = false;
+            }),
+          )
+          .subscribe();
+
+        if (targetControl.value !== control.value) {
           return null;
         }
 
@@ -22,8 +45,29 @@ export function createExtraValidators<T extends FormGroup>() {
       path: P,
       predicate: (other: AbstractControlPathValue<T, P>['value']) => boolean,
     ) {
+      injector.get(DestroyRef).onDestroy(() => {
+        subscription?.unsubscribe();
+        subscription = null;
+      });
+      let subscription: null | Subscription = null;
+      let isSelf = false;
+
       return createCrossFieldValidator<T>(function ({ root, control }) {
-        if (predicate(abstractControlPathValue(root, path).value) === false) {
+        const targetControl = abstractControlPathValue(root, path);
+
+        subscription?.unsubscribe();
+        subscription = targetControl.valueChanges
+          .pipe(
+            tap(() => {
+              if (isSelf) return;
+              isSelf = true;
+              control.updateValueAndValidity();
+              isSelf = false;
+            }),
+          )
+          .subscribe();
+
+        if (predicate(targetControl.value) === false) {
           return null;
         }
 
@@ -32,8 +76,29 @@ export function createExtraValidators<T extends FormGroup>() {
     },
 
     sameAs: function <P extends AbstractControlPaths<T>>(path: P) {
+      injector.get(DestroyRef).onDestroy(() => {
+        subscription?.unsubscribe();
+        subscription = null;
+      });
+      let subscription: null | Subscription = null;
+      let isSelf = false;
+
       return createCrossFieldValidator<T>(function ({ root, control }) {
-        if (abstractControlPathValue(root, path).value === control.value) {
+        const targetControl = abstractControlPathValue(root, path);
+
+        subscription?.unsubscribe();
+        subscription = targetControl.valueChanges
+          .pipe(
+            tap(() => {
+              if (isSelf) return;
+              isSelf = true;
+              control.updateValueAndValidity();
+              isSelf = false;
+            }),
+          )
+          .subscribe();
+
+        if (targetControl.value === control.value) {
           return null;
         }
 
@@ -48,6 +113,13 @@ export function createExtraValidators<T extends FormGroup>() {
           FormArray)['controls'][number],
       ) => ValidatorFn,
     ) {
+      injector.get(DestroyRef).onDestroy(() => {
+        subscription?.unsubscribe();
+        subscription = null;
+      });
+      let subscription: null | Subscription = null;
+      let isSelf = false;
+
       return createCrossFieldValidator<T>(function ({ root, path, control }) {
         const formArray = abstractControlPathValue(root, arrayPath);
         if (formArray instanceof FormArray === false) throw TypeError();
@@ -56,6 +128,19 @@ export function createExtraValidators<T extends FormGroup>() {
         if (index === 0) return null;
 
         const previousControl = formArray.controls[index - 1];
+
+        subscription?.unsubscribe();
+        subscription = previousControl.valueChanges
+          .pipe(
+            tap(() => {
+              if (isSelf) return;
+              isSelf = true;
+              control.updateValueAndValidity();
+              isSelf = false;
+            }),
+          )
+          .subscribe();
+
         const validator = createValidator(previousControl as any);
         return validator(control);
       });

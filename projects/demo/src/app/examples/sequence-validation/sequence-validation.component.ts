@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, Injector, OnInit } from '@angular/core';
 import {
   FormArray,
   FormControl,
@@ -23,8 +23,6 @@ type TFormGroup = FormGroup<{
   >;
 }>;
 
-const ExtraValidators = createExtraValidators<TFormGroup>();
-
 @Component({
   selector: 'app-sequence-validation',
   imports: [
@@ -38,6 +36,9 @@ const ExtraValidators = createExtraValidators<TFormGroup>();
   templateUrl: './sequence-validation.component.html',
 })
 export class SequenceValidationComponent implements OnInit {
+  injector = inject(Injector);
+  ExtraValidators = createExtraValidators<TFormGroup>(this.injector);
+
   formGroup = new FormGroup<TFormGroup['controls']>({
     tires: new FormArray<TFormGroup['controls']['tires']['controls'][number]>(
       [],
@@ -67,24 +68,20 @@ export class SequenceValidationComponent implements OnInit {
         nonNullable: true,
         validators: [
           Validators.required,
-          ExtraValidators.withPrevious('tires', (previousTire) =>
+          this.ExtraValidators.withPrevious('tires', (previousTire) =>
             Validators.min(previousTire.controls.price.value + 1),
           ),
         ],
       }),
     });
     this.formGroup.controls.tires.insert(index, control);
-    control.controls.price.updateValueAndValidity();
+    this.updateValueAndValidity(index);
     this.updateValueAndValidity(index + 1);
   }
 
   removeTire(index: number) {
     this.formGroup.controls.tires.removeAt(index);
     this.updateValueAndValidity(index);
-  }
-
-  onInput(index: number) {
-    this.updateValueAndValidity(index + 1);
   }
 
   updateValueAndValidity(index: number) {
