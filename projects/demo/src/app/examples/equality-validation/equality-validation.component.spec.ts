@@ -17,6 +17,22 @@ describe('EqualityValidationComponent', () => {
     expect(screen.getByRole('button').hasAttribute('disabled')).toBeTrue();
   });
 
+  it('should be invalid if password changes later', async () => {
+    const user = userEvent.setup();
+    await render(EqualityValidationComponent);
+
+    const password = screen.getByLabelText('Password');
+    await user.clear(password);
+    await user.type(password, 'a');
+    const confirmPassword = screen.getByLabelText('Confirm password');
+    await user.clear(confirmPassword);
+    await user.type(confirmPassword, 'a');
+    await user.type(password, 'b');
+
+    expect(screen.getByRole('button').hasAttribute('disabled')).toBeTrue();
+    expect(screen.queryByText('Values must be the same')).not.toEqual(null);
+  });
+
   it('should be valid if the password and confirm password match', async () => {
     const user = userEvent.setup();
     await render(EqualityValidationComponent);
