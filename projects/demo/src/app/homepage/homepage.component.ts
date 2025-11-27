@@ -8,6 +8,31 @@ import { CodeComponent } from '../code/code.component';
   templateUrl: './homepage.component.html',
 })
 export class HomepageComponent {
+  demoCode = `
+new FormControl(null, {
+  validators: [
+    ExtraValidators.sameAs('password'),
+
+    ExtraValidators.differentFrom('sender'),
+
+    ExtraValidators.requiredIf(
+      'shippingMethod',
+      (control) => control.value === 'delivery',
+    ),
+
+    ExtraValidators.withPrevious(
+      // Fully type-safe
+      // The path syntax is exactly the same as TypeScript
+      'group[number].tires',
+
+      // The \`withPrevious\` is a higher-order function,
+      // you can combine it with any existing validator functions
+      (previousTire) => Validators.min(previousTire.controls.price.value),
+    ),
+  ],
+});
+  `.trim();
+
   installCode = `
 $ npm i ngx-cross-field-validation
   `.trim();

@@ -1,14 +1,50 @@
-<h1 class="text-center text-xl">Getting Started</h1>
+<h1 class="text-center text-xl font-bold">Cross-field Validation</h1>
 
-<app-code class="w-80 md:w-160 lg:w-240" language="shell" [code]="installCode"></app-code>
+<h2 class="text-center text-lg font-bold mt-4 mb-2">Introduction</h2>
 
-<app-code class="w-80 md:w-160 lg:w-240" language="typescript" [code]="importCode"></app-code>
+<p>
+  This library provides several utilities that help you focus on declaring
+  business logic when working with cross-field validation in Angular.
+</p>
+
+<p class="mt-2">
+  For instance, with ngx-cross-field-validation, you can create your own
+  validator functions and use them like this:
+</p>
+
+<app-code
+  class="w-80 md:w-160 lg:w-240"
+  language="typescript"
+  [code]="demoCode"
+></app-code>
+
+<h2 class="text-center text-lg font-bold mt-4 mb-2">Getting Started</h2>
+
+<app-code
+  class="w-80 md:w-160 lg:w-240"
+  language="shell"
+  [code]="installCode"
+></app-code>
+
+<app-code
+  class="w-80 md:w-160 lg:w-240"
+  language="typescript"
+  [code]="importCode"
+></app-code>
 
 <mat-tab-group animationDuration="0">
   <mat-tab label="HTML">
-    <app-code class="w-80 md:w-160 lg:w-240" language="html" [code]="htmlCode"></app-code>
+    <app-code
+      class="w-80 md:w-160 lg:w-240"
+      language="html"
+      [code]="htmlCode"
+    ></app-code>
   </mat-tab>
   <mat-tab label="TS">
-    <app-code class="w-80 md:w-160 lg:w-240" language="typescript" [code]="tsCode"></app-code>
+    <app-code
+      class="w-80 md:w-160 lg:w-240"
+      language="typescript"
+      [code]="tsCode"
+    ></app-code>
   </mat-tab>
 </mat-tab-group>
