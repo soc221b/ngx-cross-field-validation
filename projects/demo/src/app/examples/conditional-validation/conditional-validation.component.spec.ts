@@ -1,78 +1,38 @@
-import {
-  ComponentFixture,
-  fakeAsync,
-  flush,
-  TestBed,
-  waitForAsync,
-} from '@angular/core/testing';
+import { render, screen } from '@testing-library/angular';
+import userEvent from '@testing-library/user-event';
 import { ConditionalValidationComponent } from './conditional-validation.component';
-import { By } from '@angular/platform-browser';
-import { OverlayContainer } from '@angular/cdk/overlay';
 
 describe('ConditionalValidationComponent', () => {
-  let component: ConditionalValidationComponent;
-  let fixture: ComponentFixture<ConditionalValidationComponent>;
+  it('should be invalid if the delivery address has not been entered yet', async () => {
+    const user = userEvent.setup();
+    await render(ConditionalValidationComponent);
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      imports: [ConditionalValidationComponent],
-      errorOnUnknownElements: true,
-      errorOnUnknownProperties: false,
-    });
-  }));
+    const combobox = screen.getByRole('combobox');
+    await user.click(combobox);
+    const deliveryOption = screen
+      .getAllByRole('option')
+      .filter((option) => option.textContent === 'Delivery')[0];
+    await user.click(deliveryOption);
+    const textbox = screen.getByRole('textbox');
+    await user.clear(textbox);
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(ConditionalValidationComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+    expect(screen.getByRole('button').hasAttribute('disabled')).toBeTrue();
   });
 
-  it('should be invalid if the delivery address has not been entered yet', fakeAsync(() => {
-    const trigger = fixture.debugElement.query(
-      By.css('.mat-mdc-select-trigger'),
-    )!.nativeElement;
-    const overlayContainerElement =
-      TestBed.inject(OverlayContainer).getContainerElement();
-    trigger.click();
-    fixture.detectChanges();
-    flush();
+  it('should be valid after entering the delivery address', async () => {
+    const user = userEvent.setup();
+    await render(ConditionalValidationComponent);
 
-    const options = [
-      ...overlayContainerElement.querySelectorAll('mat-option'),
-    ] as HTMLElement[];
-    options[1].click();
-    fixture.detectChanges();
-    flush();
-    const inputEl = fixture.debugElement.query(By.css('input'))!;
-    inputEl.nativeElement.value = '';
-    inputEl.triggerEventHandler('input', { target: inputEl.nativeElement });
-    fixture.detectChanges();
+    const combobox = screen.getByRole('combobox');
+    await user.click(combobox);
+    const deliveryOption = screen
+      .getAllByRole('option')
+      .filter((option) => option.textContent === 'Delivery')[0];
+    await user.click(deliveryOption);
+    const textbox = screen.getByRole('textbox');
+    await user.clear(textbox);
+    await user.type(textbox, 'somewhere');
 
-    expect(component.formGroup.controls.deliveryAddress.enabled).toBeTrue();
-    expect(component.formGroup.controls.deliveryAddress.invalid).toBeTrue();
-  }));
-
-  it('should be valid after entering the delivery address', fakeAsync(() => {
-    const trigger = fixture.debugElement.query(
-      By.css('.mat-mdc-select-trigger'),
-    )!.nativeElement;
-    const overlayContainerElement =
-      TestBed.inject(OverlayContainer).getContainerElement();
-    trigger.click();
-    fixture.detectChanges();
-    flush();
-    const options = [
-      ...overlayContainerElement.querySelectorAll('mat-option'),
-    ] as HTMLElement[];
-    options[1].click();
-    fixture.detectChanges();
-    flush();
-    const inputEl = fixture.debugElement.query(By.css('input'))!;
-    inputEl.nativeElement.value = 'Anywhere';
-    inputEl.triggerEventHandler('input', { target: inputEl.nativeElement });
-    fixture.detectChanges();
-
-    expect(component.formGroup.controls.deliveryAddress.enabled).toBeTrue();
-    expect(component.formGroup.controls.deliveryAddress.valid).toBeTrue();
-  }));
+    expect(screen.getByRole('button').hasAttribute('disabled')).toBeFalse();
+  });
 });

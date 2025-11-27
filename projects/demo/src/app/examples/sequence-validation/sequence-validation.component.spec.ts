@@ -1,82 +1,54 @@
-import {
-  ComponentFixture,
-  fakeAsync,
-  flush,
-  TestBed,
-  waitForAsync,
-} from '@angular/core/testing';
+import { render, screen } from '@testing-library/angular';
+import userEvent, { UserEvent } from '@testing-library/user-event';
 import { SequenceValidationComponent } from './sequence-validation.component';
-import { By } from '@angular/platform-browser';
 
 describe('SequenceValidationComponent', () => {
-  let component: SequenceValidationComponent;
-  let fixture: ComponentFixture<SequenceValidationComponent>;
-
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      imports: [SequenceValidationComponent],
-      errorOnUnknownElements: true,
-      errorOnUnknownProperties: false,
-    });
-  }));
-
-  beforeEach(() => {
-    fixture = TestBed.createComponent(SequenceValidationComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
-
-  function onlyLeaveOneInput() {
-    let remove1;
-    while (
-      (remove1 = fixture.debugElement.query(By.css('[data-testid="remove1"]')))
-    ) {
-      remove1.nativeElement.click();
-      fixture.detectChanges();
-      flush();
+  async function onlyLeaveOneInput(user: UserEvent) {
+    while (true) {
+      const tire2 = screen.queryByLabelText('Tire 2');
+      if (tire2 === null) break;
+      const removes = screen.getAllByText('Remove');
+      await user.click(removes[0]);
     }
   }
 
-  function addOneInputAfter(index: number) {
-    const add = fixture.debugElement.query(
-      By.css(`[data-testid="add${index}"]`),
-    );
-    add.nativeElement.click();
-    fixture.detectChanges();
-    flush();
-  }
+  it('should be invalid if the current price is not higher than the previous price', async () => {
+    const user = userEvent.setup();
+    await render(SequenceValidationComponent);
 
-  function type(index: number, value: string) {
-    const input = fixture.debugElement.query(
-      By.css(`[data-testid="input${index}"]`),
-    )!;
-    input.nativeElement.value = value;
-    input.triggerEventHandler('input', {
-      target: input.nativeElement,
-    });
-  }
+    await onlyLeaveOneInput(user);
+    const tire1 = screen.getByLabelText('Tire 1');
+    await user.clear(tire1);
+    await user.type(tire1, '0');
+    const add = screen.getByText('Add');
+    await user.click(add);
 
-  it('should be invalid if the current price is not higher than the previous price', fakeAsync(() => {
-    onlyLeaveOneInput();
-    type(0, '0');
-    addOneInputAfter(0);
-
-    type(1, '0');
+    const tire2 = screen.getByLabelText('Tire 2');
+    await user.clear(tire2);
+    await user.type(tire2, '0');
 
     expect(
-      component.formGroup.controls.tires.controls[1].controls.price.invalid,
+      screen.getByText('Submit').closest('button')?.hasAttribute('disabled'),
     ).toBeTrue();
-  }));
+  });
 
-  it('should be valid if the current price is higher than the previous price', fakeAsync(() => {
-    onlyLeaveOneInput();
-    type(0, '0');
-    addOneInputAfter(0);
+  it('should be valid if the current price is higher than the previous price', async () => {
+    const user = userEvent.setup();
+    await render(SequenceValidationComponent);
 
-    type(1, '1');
+    await onlyLeaveOneInput(user);
+    const tire1 = screen.getByLabelText('Tire 1');
+    await user.clear(tire1);
+    await user.type(tire1, '0');
+    const add = screen.getByText('Add');
+    await user.click(add);
+
+    const tire2 = screen.getByLabelText('Tire 2');
+    await user.clear(tire2);
+    await user.type(tire2, '1');
 
     expect(
-      component.formGroup.controls.tires.controls[1].controls.price.valid,
-    ).toBeTrue();
-  }));
+      screen.getByText('Submit').closest('button')?.hasAttribute('disabled'),
+    ).toBeFalse();
+  });
 });
