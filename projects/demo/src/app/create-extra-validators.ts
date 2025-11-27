@@ -1,4 +1,4 @@
-import { FormArray, FormGroup, ValidatorFn } from '@angular/forms';
+import { FormArray, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import {
   AbstractControlPaths,
   AbstractControlPathValue,
@@ -22,12 +22,12 @@ export function createExtraValidators<T extends FormGroup>() {
       path: P,
       predicate: (other: AbstractControlPathValue<T, P>['value']) => boolean,
     ) {
-      return createCrossFieldValidator<T>(function ({ root }) {
-        if (predicate(abstractControlPathValue(root, path).value)) {
+      return createCrossFieldValidator<T>(function ({ root, control }) {
+        if (predicate(abstractControlPathValue(root, path).value) === false) {
           return null;
         }
 
-        return { required: true };
+        return Validators.required(control);
       });
     },
 
