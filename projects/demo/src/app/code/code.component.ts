@@ -23,13 +23,13 @@ export class CodeComponent implements OnInit, AfterViewInit, OnDestroy {
       .pipe(
         startWith(),
         delay(0),
-        tap(() => (window as any).hljs.highlightAll()),
+        tap(() => (window as any).hljs?.highlightAll()),
       )
       .subscribe();
   }
 
   ngAfterViewInit(): void {
-    (window as any).hljs.highlightAll();
+    (window as any).hljs?.highlightAll();
   }
 
   ngOnDestroy(): void {

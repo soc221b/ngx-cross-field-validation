@@ -68,7 +68,7 @@ export class SequenceValidationComponent implements OnInit {
         validators: [
           Validators.required,
           ExtraValidators.withPrevious('tires', (previousTire) =>
-            Validators.min(previousTire.controls.price.value),
+            Validators.min(previousTire.controls.price.value + 1),
           ),
         ],
       }),
