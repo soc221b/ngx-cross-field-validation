@@ -8,9 +8,7 @@
         <mat-label>Tire {{ $index + 1 }}</mat-label>
         <input
           matInput
-          name="username"
           type="number"
-          autocomplete="username"
           [formControl]="tire.controls.price"
           (input)="onInput($index)"
           [attr.data-testid]="'input' + $index"
