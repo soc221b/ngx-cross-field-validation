@@ -125,11 +125,13 @@ export function createExtraValidators<T extends FormGroup>(injector: Injector) {
         if (formArray instanceof FormArray === false) throw TypeError();
         const index = path.slice(1)[0];
         if (typeof index !== 'number') throw TypeError();
+        subscription?.unsubscribe();
+        subscription = null;
+        if (index === -1) return null;
         if (index === 0) return null;
 
         const previousControl = formArray.controls[index - 1];
 
-        subscription?.unsubscribe();
         subscription = previousControl.valueChanges
           .pipe(
             tap(() => {
