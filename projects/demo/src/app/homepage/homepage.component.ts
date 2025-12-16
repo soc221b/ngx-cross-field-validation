@@ -10,77 +10,25 @@ export class HomepageComponent {
   demoCode = `
 new FormControl(null, {
   validators: [
-    ExtraValidators.sameAs('password'),
-
-    ExtraValidators.differentFrom('sender'),
-
-    ExtraValidators.requiredIf(
-      'shippingMethod',
-      (control) => control.value === 'delivery',
-    ),
-
-    ExtraValidators.withPrevious(
-      // Fully type-safe
-      // The path syntax is exactly the same as TypeScript
-      'group[number].tires',
-
-      // The \`withPrevious\` is a higher-order function,
-      // you can combine it with any existing validator functions
-      (previousTire) => Validators.min(previousTire.controls.price.value),
+    createCrossFieldValidator<Form>(
+      this.injector, // to automatically invoke updateValueAndValidity when relevant controls change,
+                     // and clean up subscriptions when the component is destroyed
+      function ({
+        control, // the control being validated
+        path, // the path to the control being validated
+        get, // like abstractControl.get but with type safety
+      }) {
+        return get('shippingMethod').value === 'delivery'
+          ? Validators.required(control)
+          : null;
+      },
     ),
   ],
-});
+}
   `.trim();
 
   installCode = `
 $ npm i ngx-cross-field-validation
-  `.trim();
-
-  implementationCode = `
-import {
-  createCrossFieldValidator,
-  abstractControlPathValue,
-  AbstractControlPathValue,
-  AbstractControlPaths,
-} from 'ngx-cross-field-validation';
-
-function createExtraValidators<T extends FormGroup>(injector: Injector) {
-  return {
-    requiredIf: function <P extends AbstractControlPaths<T>>(
-      targetPath: P,
-      predicate: (targetValue: AbstractControlPathValue<T, P>['value']) => boolean,
-    ) {
-      injector.get(DestroyRef).onDestroy(() => {
-        subscription?.unsubscribe();
-        subscription = null;
-      });
-      let subscription: null | Subscription = null;
-      let isSelf = false;
-
-      return createCrossFieldValidator<T>(function ({ root, control }) {
-        const targetControl = abstractControlPathValue(root, targetPath);
-
-        subscription?.unsubscribe();
-        subscription = targetControl.valueChanges
-          .pipe(
-            tap(() => {
-              if (isSelf) return;
-              isSelf = true;
-              control.updateValueAndValidity();
-              isSelf = false;
-            }),
-          )
-          .subscribe();
-
-        if (predicate(targetControl.value) === false) {
-          return null;
-        }
-
-        return Validators.required(control);
-      });
-    },
-  };
-}
   `.trim();
 
   htmlCode = `
@@ -97,17 +45,16 @@ function createExtraValidators<T extends FormGroup>(injector: Injector) {
   `.trim();
 
   tsCode = `
-type T = FormGroup<{
+type Form = FormGroup<{
   shippingMethod: FormControl<'pickup' | 'delivery'>;
   deliveryAddress: FormControl<null | string>;
 }>;
 
 @Component({ ... })
 export class MyComponent {
-  private readonly injector = inject(Injector);
-  private readonly ExtraValidators = createExtraValidators<T>(this.injector);
+  injector = inject(Injector);
 
-  protected readonly formGroup = new FormGroup<T['controls']>({
+  formGroup = new FormGroup<Form['controls']>({
     shippingMethod: new FormControl('pickup', {
       nonNullable: true,
       validators: [
@@ -116,9 +63,15 @@ export class MyComponent {
     }),
     deliveryAddress: new FormControl(null, {
       validators: [
-        this.ExtraValidators.requiredIf(
-          'shippingMethod',
-          (value) => value === 'delivery',
+        createCrossFieldValidator<Form>(
+          this.injector,
+          function ({ control, get }) {
+            const targetControl = get('shippingMethod');
+
+            return targetControl.value === 'delivery'
+              ? Validators.required(control)
+              : null;
+          },
         ),
       ],
     }),
