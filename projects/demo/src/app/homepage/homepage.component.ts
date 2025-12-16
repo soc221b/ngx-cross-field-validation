@@ -107,7 +107,7 @@ export class MyComponent {
   private readonly injector = inject(Injector);
   private readonly ExtraValidators = createExtraValidators<T>(this.injector);
 
-  protected readonly formGroup = new FormGroup<T>({
+  protected readonly formGroup = new FormGroup<T['controls']>({
     shippingMethod: new FormControl('pickup', {
       nonNullable: true,
       validators: [
@@ -116,7 +116,7 @@ export class MyComponent {
     }),
     deliveryAddress: new FormControl(null, {
       validators: [
-        ExtraValidators.requiredIf(
+        this.ExtraValidators.requiredIf(
           'shippingMethod',
           (value) => value === 'delivery',
         ),
